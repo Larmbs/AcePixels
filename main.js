@@ -41,35 +41,6 @@ var firing = false, shotCountMax = 50, shotCount = 0, coolDown = 200, ready = 20
 
 var bullets = [];
 
-var jsonFile = 'data.json';
-var cachedData = localStorage.getItem('cachedData');
-
-if (cachedData) {
-  // Use the cached data
-  var jsonData = JSON.parse(cachedData);
-  processJsonData(jsonData);
-} else {
-  // Fetch the JSON file and cache the data
-  fetch(jsonFile)
-    .then(response => response.json())
-    .then(jsonData => {
-      // Store the data in localStorage
-      localStorage.setItem('cachedData', JSON.stringify(jsonData));
-      
-      // Process the JSON data
-      processJsonData(jsonData);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
-}
-
-function processJsonData(jsonData) {
-  // Process the JSON data as needed
-  console.log(jsonData);
-}
-
-
 //Classes//
 //Classes//
 //Classes//
@@ -395,13 +366,23 @@ document.addEventListener("keyup", function (event) {
 //MainLoop//
 //MainLoop//
 //MainLoop//
-Ground.fromJSONFile('data.json')
-  .then(result => {
-    ground = result
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
+var cachedData = localStorage.getItem('cachedData');
+if (cachedData) {
+  ground = JSON.parse(cachedData);
+  console.log('Using cached data:', ground);
+} else {
+  // Fetch the JSON file and cache the data
+  Ground.fromJSONFile('data.json')
+    .then(result => {
+      ground = result;
+      console.log('Fetched data:', ground);
+      // Store the data in local storage
+      localStorage.setItem('cachedData', JSON.stringify(ground));
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+}
 
 /*ground = new Ground(-500000, 0, "#315e33", 1000000, 50000, 0, true);
 tower1 = new Ground(-5000, -5000, "rgba(113, 122, 163, 1)", 1000, 5000, 1, false);

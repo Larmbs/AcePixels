@@ -199,7 +199,7 @@ class Bullet {
       bullets.shift();
       
     }
-    particles.push(new Trail(this.x + Math.cos(-this.direction) * -100 - Math.sin(-this.direction) * -10, this.y + Math.sin(-this.direction) * -100 - Math.cos(-this.direction) * 10, 'rgba(255, 255, 255, 0.5', 5 , 30, 0, 0, Math.atan2(this.vy, this.vx) + Math.PI));
+    particles.push(new Trail(this.x + Math.cos(-this.direction) * -100 - Math.sin(-this.direction) * -10, this.y + Math.sin(-this.direction) * -100 - Math.cos(-this.direction) * 10, 'rgba(243, 247, 7, 0.5', 5 , 30, 0, 0, Math.atan2(this.vy + 1, this.vx) + Math.PI));
 
   }
 }

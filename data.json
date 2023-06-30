@@ -1,0 +1,120 @@
+[
+    {
+      "x": -500000,
+      "y": 0,
+      "color": "#315e33",
+      "width": 1000000,
+      "height": 50000,
+      "parallaxFactor": 0,
+      "collider": true
+    },
+    {
+      "x": -5000,
+      "y": -5000,
+      "color": "rgba(113, 122, 163, 1)",
+      "width": 1000,
+      "height": 5000,
+      "parallaxFactor": 1,
+      "collider": false
+    },
+    {
+      "x": -2000,
+      "y": -6000,
+      "color": "rgba(66, 70, 94, 1)",
+      "width": 1000,
+      "height": 6000,
+      "parallaxFactor": 1,
+      "collider": false
+    },
+    {
+      "x": 1000,
+      "y": -3000,
+      "color": "rgba(87, 130, 116, 1)",
+      "width": 1000,
+      "height": 3000,
+      "parallaxFactor": 1,
+      "collider": false
+    },
+    {
+      "x": 5000,
+      "y": -2000,
+      "color": "rgba(102, 112, 109, 1)",
+      "width": 1000,
+      "height": 2000,
+      "parallaxFactor": 1,
+      "collider": false
+    },
+    {
+      "x": 8000,
+      "y": -5000,
+      "color": "rgba(113, 122, 163, 1)",
+      "width": 1000,
+      "height": 5000,
+      "parallaxFactor": 1,
+      "collider": false
+    },
+    {
+      "x": 11000,
+      "y": -6000,
+      "color": "rgba(66, 70, 94, 1)",
+      "width": 1000,
+      "height": 6000,
+      "parallaxFactor": 1,
+      "collider": false
+    },
+    {
+      "x": 14000,
+      "y": -3000,
+      "color": "rgba(87, 130, 116, 1)",
+      "width": 1000,
+      "height": 3000,
+      "parallaxFactor": 1,
+      "collider": false
+    },
+    {
+      "x": 17000,
+      "y": -2000,
+      "color": "rgba(102, 112, 109, 1)",
+      "width": 1000,
+      "height": 2000,
+      "parallaxFactor": 1,
+      "collider": false
+    },
+    {
+      "x": 20000,
+      "y": -5000,
+      "color": "rgba(113, 122, 163, 1)",
+      "width": 1000,
+      "height": 5000,
+      "parallaxFactor": 1,
+      "collider": false
+    },
+    {
+      "x": 23000,
+      "y": -6000,
+      "color": "rgba(66, 70, 94, 1)",
+      "width": 1000,
+      "height": 6000,
+      "parallaxFactor": 1,
+      "collider": false
+    },
+    {
+      "x": 26000,
+      "y": -3000,
+      "color": "rgba(87, 130, 116, 1)",
+      "width": 1000,
+      "height": 3000,
+      "parallaxFactor": 1,
+      "collider": false
+    },
+    {
+      "x": 28500,
+      "y": -2000,
+      "color": "rgba(102, 112, 109, 1)",
+      "width": 1000,
+      "height": 2000,
+      "parallaxFactor": 1,
+      "collider": false
+    }
+  ]
+  

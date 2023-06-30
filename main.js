@@ -392,7 +392,7 @@ document.addEventListener("keyup", function (event) {
 //MainLoop//
 //MainLoop//
 var cachedData = localStorage.getItem('cachedData');
-if (cachedData) {
+
   // Fetch the JSON file and cache the data
   Ground.fromJSONFile('data.json')
     .then(result => {
@@ -404,7 +404,7 @@ if (cachedData) {
     .catch(error => {
       console.error('Error:', error);
     });
-}
+
 
 /*ground = new Ground(-500000, 0, "#315e33", 1000000, 50000, 0, true);
 tower1 = new Ground(-5000, -5000, "rgba(113, 122, 163, 1)", 1000, 5000, 1, false);

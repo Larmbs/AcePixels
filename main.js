@@ -24,6 +24,8 @@ cloudPack.src = 'https://i.ibb.co/vVMpdqP/8614580.png';
 
 var ground;
 
+var grounds;
+
 let f86;
 
 //Key press vars
@@ -391,9 +393,6 @@ document.addEventListener("keyup", function (event) {
 //MainLoop//
 var cachedData = localStorage.getItem('cachedData');
 if (cachedData) {
-  ground = JSON.parse(cachedData);
-  console.log('Using cached data:', ground);
-} else {
   // Fetch the JSON file and cache the data
   Ground.fromJSONFile('data.json')
     .then(result => {

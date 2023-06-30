@@ -41,7 +41,7 @@ var firing = false, shotCountMax = 50, shotCount = 0, coolDown = 200, ready = 20
 
 var bullets = [];
 
-var jsonFile = 'yourfile.json';
+var jsonFile = 'data.json';
 var cachedData = localStorage.getItem('cachedData');
 
 if (cachedData) {

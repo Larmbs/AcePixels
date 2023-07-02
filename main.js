@@ -43,29 +43,6 @@ var firing = false, shotCountMax = 50, shotCount = 0, coolDown = 200, ready = 20
 
 var bullets = [];
 
-var jsonFile = 'data.json';
-var cachedData = localStorage.getItem('cachedData');
-
-if (cachedData) {
-  var jsonData = JSON.parse(cachedData);
-  processJsonData(jsonData);
-} else {
-  fetch(jsonFile)
-    .then(response => response.json())
-    .then(jsonData => {
-      localStorage.setItem('cachedData', JSON.stringify(jsonData));
-      processJsonData(jsonData);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
-}
-
-function processJsonData(jsonData) {
-  // Process the JSON data as needed
-  console.log(jsonData);
-}
-
 //Classes//
 //Classes//
 //Classes//

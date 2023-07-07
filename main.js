@@ -68,31 +68,35 @@ class Player {
     this.thrustRate = thrustRate;
     this.angle = angle;
     this.dragForce = dragForce;
-    this.gravity = 30;
+    this.gravity = 40;
     this.flipped = flipped;
     this.x = x;
     this.y = y;
     this.v = 0;
     this.airSpeedAngle = 0;
     this.count = 0;
-    this.health = health
+    this.health = health;
+    this.brake = false;
   }
   //Run calc on forces
   updateForces() {
     var v = Math.sqrt((this.Vx ** 2) + (this.Vy ** 2));
     var attack = this.angle - this.airSpeedAngle;
     this.airSpeedAngle = this.angle;
-    var bodyDragCoefficient = 0.05;
-    var D = (this.dragForce * Math.sin(attack) + bodyDragCoefficient) * Math.pow(v, 2) / 10;
-    var tX = this.thrust * Math.cos(this.angle) * 2.5;
-    var tY = this.thrust * Math.sin(this.angle) * 2.5;
+    var bodyDragCoefficient = 0.07;
+    var D = (this.dragForce * Math.sin(attack) + bodyDragCoefficient) * Math.pow(v, 2) / 15 + 1;
+    var tX = this.thrust * Math.cos(this.angle) * 2.4;
+    var tY = this.thrust * Math.sin(this.angle) * 2.4;
     //lX = 0 * v * this.liftForce * Math.cos(this.angle - Math.PI / 2) * Math.abs(Math.cos(this.angle - Math.PI / 2)) / 100;
-    let inertiaX = this.Vx / 2.5
-    let inertiaY = this.Vy / 2.5
+    let inertiaX = Math.floor(this.Vx / 1.5)
+    let inertiaY = Math.floor(this.Vy / 1.5)
 
     var lY = Math.abs(v * this.liftForce * Math.pow(Math.sin(this.angle + Math.PI / 2), 2)) / 200;
     this.Vx = Math.floor((Math.cos(this.angle) * (v - D) + tX + 0) * 10000) / 10000 + inertiaX;
     this.Vy = Math.floor((Math.sin(this.angle) * (v - D) + tY + lY - this.gravity) * 100) / 100 + inertiaY;
+    if (this.brake && this.thrust >= 15) {
+      this.thrust -= 5;
+    }
     this.x += this.Vx;
     this.y += this.Vy;
     this.v = v;
@@ -102,12 +106,12 @@ class Player {
       this.Vy = 0;
       this.Vx /= 2
     };
-
+    
     
     //particles
 
     //Smoke trail
-    particles.push(new Trail(this.x + Math.cos(this.angle) * -230, this.y + Math.sin(this.angle) * -230 - Math.cos(this.angle) * 10, 'rgba(255, 255, 255, 0.5', Math.floor(Math.abs(this.v / 10)) , 60 , 0, 0, Math.atan2(this.Vy, this.Vx) + Math.PI, 30 + Math.abs(Math.sin(this.angle) * 30)));
+    particles.push(new Trail(this.x + Math.cos(this.angle) * -230, this.y + Math.sin(this.angle) * -230 - Math.cos(this.angle) * 10, 'rgba(255, 255, 255, 0.5', Math.floor(Math.abs(this.v / 20)) , 60 , 0, 0, Math.atan2(Math.floor(this.Vy), Math.floor(this.Vx)) + Math.PI, 30 + Math.abs(Math.sin(this.angle) * 30)));
     
     //particles.push(new Trail(this.x + Math.cos(-this.angle) * -90 - Math.sin(-this.angle) * -10, this.y + Math.sin(-this.angle) * -90 - Math.cos(-this.angle) * 10, 'rgba(252, 98, 3, 0.7', Math.floor(Math.abs(this.v / 32)) , 30, 0, 0, -this.angle + Math.PI));#511a19
 
@@ -134,7 +138,9 @@ class Player {
   update() {
   var a = ((this.angle + Math.PI / 8) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
   var r = Math.floor(( 4 * a ) / Math.PI);
-  
+  if (this.brake) {
+    r = 2
+  }
   ctx.save();
   ctx.translate(window.innerWidth / 2, window.innerHeight / 2);
   ctx.rotate(-this.angle + (Math.PI / 2));
@@ -200,7 +206,7 @@ class Bullet {
       ctx.arc(this.x - screenScroll[0], -this.y + screenScroll[1], this.size, 0, 2 * Math.PI);
       ctx.fill();
       ctx.restore();
-      particles.push(new Trail(this.x, this.y, 'red', 1 , 30, 0, 0, Math.atan2(this.vy  , this.vx) + Math.PI, 20));
+      particles.push(new Trail(this.x, this.y, 'red', 1 , this.size * 4, 0, 0, Math.atan2(this.vy  , this.vx) + Math.PI, this.size * 2));
 
     } else if (this.size != null) {
       this.deleteNull()
@@ -347,8 +353,8 @@ class enemyTurret {
     ctx.moveTo(this.x - screenScroll[0] + 500, this.y + screenScroll[1] - 500);
     ctx.lineTo(this.x + 500 - screenScroll[0] + (Math.cos(this.turretAngle) * 1000), this.y - 500 + screenScroll[1] + (Math.sin(this.turretAngle) * -1000));
     
-    ctx.lineWidth = 30;
-    ctx.strokeStyle = 'blue';
+    ctx.lineWidth = 120;
+    ctx.strokeStyle = '#adadad';
     ctx.stroke();
 
     
@@ -374,7 +380,7 @@ class enemyTurret {
       this.drawBase()
       this.c += 1;
       if (this.c > 15) {
-        bullets.push(new Bullet(this.turretAngle, 7.5, this.x + 500 + (Math.cos(this.turretAngle) * 2500) ,  this.y + 500 + (Math.sin(this.turretAngle) * 2500), Math.cos(this.turretAngle) * 200, Math.sin(this.turretAngle) * 200, "red", true, 200));
+        bullets.push(new Bullet(this.turretAngle, 30, this.x + 500 + (Math.cos(this.turretAngle) * 2500) ,  this.y + 500 + (Math.sin(this.turretAngle) * 2500), Math.cos(this.turretAngle) * 200, Math.sin(this.turretAngle) * 200, "red", true, 200));
         this.c = 0;
     }}}
 
@@ -453,20 +459,24 @@ class enemyPlane {
 
     //Speed up or slow down
     let r = Math.sqrt(Math.pow(-this.y + f86.y, 2) + Math.pow(-this.x + f86.x, 2))
-    if (Math.abs(attack) == 0 && this.thrust < 120 && r > 6000) {
+    if (Math.abs(attack) == 0 && this.thrust < 100 && r > 6000) {
       this.thrust += 1
     } else if (this.thrust > 35) {this.thrust -= 1}
 
     //Calculation thrust
-    let tx = this.thrust * Math.cos(this.angle) * 2.5;
-    let ty = this.thrust * Math.sin(this.angle) * 2.5;
+    let tx = this.thrust * Math.cos(this.angle) * 2.2;
+    let ty = this.thrust * Math.sin(this.angle) * 2.2;
 
     //Lift Calculation
     var lY = Math.abs(this.v * this.lift * Math.pow(Math.sin(this.angle + Math.PI / 2), 2)) / 200;
+    
+    //keep prev velocity
+    let inertiaX = this.vx / 1.5
+    let inertiaY = this.vy / 1.5
 
     //Everything togheter
-    this.vx = Math.floor((Math.cos(this.angle) * (this.v - D) + tx) * 10000) / 10000;
-    this.vy = Math.floor((Math.sin(this.angle) * (this.v - D) + ty + lY - this.g) * 100) / 100;
+    this.vx = Math.floor((Math.cos(this.angle) * (this.v - D) + tx) * 10000) / 10000 + inertiaX;
+    this.vy = Math.floor((Math.sin(this.angle) * (this.v - D) + ty + lY - this.g) * 100) / 100 + inertiaY;
 
     //Adding the calculated velocities
     this.x += this.vx;
@@ -538,10 +548,10 @@ class enemyPlane {
     }
 
     if (Math.abs(f) < Math.PI / 2) {
-      if (f > Math.PI / 90) {this.angle += Math.PI / 90 + p * Math.PI / 90} 
-      else if (f < -Math.PI / 90) {this.angle -= Math.PI / 90 + p * Math.PI / 90}
+      if (f > Math.PI / 180) {this.angle += Math.PI / 180 + p * Math.PI / 180} 
+      else if (f < -Math.PI / 180) {this.angle -= Math.PI / 180 + p * Math.PI /180}
   }
-  else {this.angle += Math.PI / 90 + p * Math.PI / 90}
+  else {this.angle += Math.PI / 180 + p * Math.PI / 180}
 
 
   }
@@ -575,9 +585,8 @@ document.addEventListener("keydown", function (event) {
   } else if (event.key === "x") {
     zoomin = true;
     zoomInterval = setInterval(zoomIn, 16);
-  } else if (event.key === "Space") {
-    f86.Vx = 0
-    f86.Vy = 0
+  } else if (event.key === " ") {
+    f86.brake = true;
   };
 });
 
@@ -592,6 +601,8 @@ document.addEventListener("keyup", function (event) {
     zoomout = false;
   } else if (event.key === "x") {
     zoomin = false;
+  } else if (event.key === " ") {
+    f86.brake = false;
   };
 
 
@@ -741,7 +752,7 @@ loadResources(imageUrls)
   .then(function(resources) {
     
     
-    f86 = new Player("f86", 0, 0, 20, Math.PI / 70, 100, 0, 1, 0, 0.003125, true, 0 ,10000, 100);
+    f86 = new Player("f86", 0, 0, 20, Math.PI / 60, 100, 0, 1, 0, 0.003125, true, 0 ,10000, 100);
 
     mainLoop();
   })
@@ -809,5 +820,7 @@ function mainLoop() {
 
 
 
+
+  
 
   

@@ -830,7 +830,7 @@ loadResources(imageUrls)
   .then(function(resources) {
     
     
-    f22 = new Player("f22", 0, 10000, 0, 0, 0, 0, 20, 0.003125, Math.PI / 90, 0, 1, true, 100);
+    f22 = new Player("f22", 0, 10000, 0, 0, 0, 0, 20, 0.003125, Math.PI / 60, 0, 1, true, 100);
 
     mainLoop();
   })

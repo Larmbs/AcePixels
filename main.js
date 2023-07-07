@@ -26,53 +26,27 @@ var mouse_y;
 canvas.addEventListener("mousedown", handleMouseDown);
 canvas.addEventListener("mouseup", handleMouseUp);
 
-
-
-
-
-
-const image = new Image();
-image.src = 'https://i.ibb.co/S68kpNC/F-86.png';
-
 const cloudPack = new Image();
 cloudPack.src = 'https://i.ibb.co/vVMpdqP/8614580.png';
 
 var imageUrls = ['https://i.ibb.co/JxtwGgb/px-Art-1.png',
-
 'https://i.ibb.co/SRV0M3d/px-Art-2.png',
-
 'https://i.ibb.co/qJhk5Vf/px-Art-3.png',
-
 'https://i.ibb.co/PtgH00W/px-Art-4.png',
-
 'https://i.ibb.co/zRb8czd/px-Art-5.png',
-
 'https://i.ibb.co/Y2CtJ3c/px-Art-6.png', 
-
 'https://i.ibb.co/djd4QJt/px-Art-1-copy-2.png',
-
-'https://i.ibb.co/3RcZRk1/px-Art-1-copy.png', 
-
-
-
-'https://i.ibb.co/S68kpNC/F-86.png']
+'https://i.ibb.co/3RcZRk1/px-Art-1-copy.png']
 
 
 //Key press vars
 var trottledown = false, trottleup = false, trottleInterval;
-
 var zoomout = false, zoomin = false, zoomLevel = 0.09, zoomInterval, zoomScale = 0.01;
-
 var screenScroll = [0, 0];
-
 var particles = [];
-
 var firing = false, shotCountMax = 100, shotCount = 0, coolDown = 200, ready = 200;
-
 var bullets = [];
-
 let f86;
-
 
 //Classes//
 //Classes//
@@ -83,7 +57,7 @@ let f86;
 //Plane Sprite Class 
 class Player {
   //Declare this.vars
-  constructor(name, Vx, Vy, liftForce, turnRate, maxThrust, thrust, thrustRate, angle, dragForce, img, flipped, x ,y) {
+  constructor(name, Vx, Vy, liftForce, turnRate, maxThrust, thrust, thrustRate, angle, dragForce, flipped, x ,y, health) {
     this.name = name;
     this.Vx = Vx;
     this.Vy = Vy;
@@ -94,15 +68,14 @@ class Player {
     this.thrustRate = thrustRate;
     this.angle = angle;
     this.dragForce = dragForce;
-    this.img = img;
-    this.Wx = window.innerWidth / 2;
-    this.Wy = window.innerHeight / 2;
     this.gravity = 30;
     this.flipped = flipped;
     this.x = x;
     this.y = y;
     this.v = 0;
     this.airSpeedAngle = 0;
+    this.count = 0;
+    this.health = health
   }
   //Run calc on forces
   updateForces() {
@@ -111,17 +84,20 @@ class Player {
     this.airSpeedAngle = this.angle;
     var bodyDragCoefficient = 0.05;
     var D = (this.dragForce * Math.sin(attack) + bodyDragCoefficient) * Math.pow(v, 2) / 10;
-    var tX = this.thrust * Math.cos(this.angle) * 2;
-    var tY = this.thrust * Math.sin(this.angle) * 2;
+    var tX = this.thrust * Math.cos(this.angle) * 2.5;
+    var tY = this.thrust * Math.sin(this.angle) * 2.5;
     //lX = 0 * v * this.liftForce * Math.cos(this.angle - Math.PI / 2) * Math.abs(Math.cos(this.angle - Math.PI / 2)) / 100;
+    let inertiaX = this.Vx / 2.5
+    let inertiaY = this.Vy / 2.5
+
     var lY = Math.abs(v * this.liftForce * Math.pow(Math.sin(this.angle + Math.PI / 2), 2)) / 200;
-    this.Vx = Math.floor((Math.cos(this.angle) * (v - D) + tX + 0) * 10000) / 10000;
-    this.Vy = Math.floor((Math.sin(this.angle) * (v - D) + tY + lY - this.gravity) * 100) / 100;
+    this.Vx = Math.floor((Math.cos(this.angle) * (v - D) + tX + 0) * 10000) / 10000 + inertiaX;
+    this.Vy = Math.floor((Math.sin(this.angle) * (v - D) + tY + lY - this.gravity) * 100) / 100 + inertiaY;
     this.x += this.Vx;
     this.y += this.Vy;
     this.v = v;
 
-    if (this.y <= 25 && this.Vy < 0) {
+    if (this.y <= 10 && this.Vy < 0) {
       this.y = 25;
       this.Vy = 0;
       this.Vx /= 2
@@ -136,8 +112,14 @@ class Player {
     //particles.push(new Trail(this.x + Math.cos(-this.angle) * -90 - Math.sin(-this.angle) * -10, this.y + Math.sin(-this.angle) * -90 - Math.cos(-this.angle) * 10, 'rgba(252, 98, 3, 0.7', Math.floor(Math.abs(this.v / 32)) , 30, 0, 0, -this.angle + Math.PI));#511a19
 
     if (firing && shotCount <= shotCountMax && coolDown == ready) {
-    bullets.push(new Bullet(this.angle, 7.5, this.x + Math.cos(this.angle) * (Math.floor(Math.random() * (101)) + 100), this.y + Math.sin(this.angle) * (Math.floor(Math.random() * (101)) + 100), this.Vx + Math.cos(this.angle) * 200  + Math.floor(Math.random() * 4) - 2, this.Vy + Math.sin(this.angle) * 200  + Math.floor(Math.random() * 4) - 2, "red"));
-    shotCount += 1;
+      if (this.count >= 3) {
+        
+        bullets.push(new Bullet(this.angle, 15, this.x + Math.cos(this.angle) * (Math.floor(Math.random() * (101)) + 100), this.y + Math.sin(this.angle) * (Math.floor(Math.random() * (101)) + 100), this.Vx + Math.cos(this.angle) * 600  + Math.floor(Math.random() * 4) - 2, this.Vy + Math.sin(this.angle) * 600  + Math.floor(Math.random() * 4) - 2, "red"));
+        shotCount += 1;
+        this.count = 0;
+      }
+      this.count += 1
+
     if (shotCount > shotCountMax) {
       coolDown = 0
       shotCount = 0;
@@ -150,11 +132,11 @@ class Player {
   
   //Update pos of plane and draw
   update() {
-  
-  var r = Math.floor((4*(this.angle)) / Math.PI);
+  var a = ((this.angle + Math.PI / 8) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+  var r = Math.floor(( 4 * a ) / Math.PI);
   
   ctx.save();
-  ctx.translate(this.Wx, this.Wy);
+  ctx.translate(window.innerWidth / 2, window.innerHeight / 2);
   ctx.rotate(-this.angle + (Math.PI / 2));
   ctx.scale(-1 * zoomLevel / 2,1 * zoomLevel / 2);
   ctx.drawImage(resources[r], -resources[r].width / 2, -resources[r].height / 2, resources[r].width, resources[r].height);
@@ -173,24 +155,24 @@ class Ground {
     this.y = y;
     this.color = color;
     this.width = width;
-    this. height = height;
+    this.height = height;
     this.m = parallaxFactor;
     this.collider = collider;
   }
   render() {
+    if (Math.sqrt((this.x - f86.x) ** 2 + (this.y - f86.y) ** 2) <= 800 / zoomLevel + 13000 || this.m == 0) {
     ctx.fillStyle = this.color;
     // Draw the filled rectangle
     ctx.save();
     ctx.translate(window.innerWidth / 2, window.innerHeight / 2);
     ctx.scale(zoomLevel,zoomLevel);
     ctx.fillRect(this.x  - screenScroll[0] * this.m, this.y + screenScroll[1], this.width, this.height);
-    ctx.restore();
+    ctx.restore();}
   }
 }
-
 //Bullets class
 class Bullet {
-  constructor(direction, size, x, y, vx, vy, color) {
+  constructor(direction, size, x, y, vx, vy, color, flak, time) {
     this.direction = direction;
     this.size = size;
     this.x = x;
@@ -199,6 +181,8 @@ class Bullet {
     this.vy = vy;
     this.time = 0;
     this.color = color;
+    this.flak = flak;
+    this.maxTime = time;
   }
   update() {
     this.vx = this.vx;
@@ -206,8 +190,8 @@ class Bullet {
     this.x += this.vx;
     this.y += this.vy;
     this.time += 1;
-    
-    if (this.y >= 0) {
+
+    if (this.y > 10) {
       ctx.save();
       ctx.translate(window.innerWidth / 2, window.innerHeight / 2);
       ctx.scale(zoomLevel,zoomLevel);
@@ -216,13 +200,37 @@ class Bullet {
       ctx.arc(this.x - screenScroll[0], -this.y + screenScroll[1], this.size, 0, 2 * Math.PI);
       ctx.fill();
       ctx.restore();
-    } else {
-      delete this;
-      bullets.shift();
+      particles.push(new Trail(this.x, this.y, 'red', 1 , 30, 0, 0, Math.atan2(this.vy  , this.vx) + Math.PI, 20));
+
+    } else if (this.size != null) {
+      this.deleteNull()
+      
       
     }
-    particles.push(new Trail(this.x, this.y, 'red', 1 , 30, 0, 0, Math.atan2(this.vy  , this.vx) + Math.PI, 20));
+    let r = Math.sqrt(Math.pow(-this.y + f86.y, 2) + Math.pow(-this.x + f86.x, 2))
 
+    if (r < 500) {
+      f86.health -= 1
+      this.deleteNull()
+    }
+    if (this.maxTime <= this.time && this.flak) {
+      this.deleteNull()
+
+    }
+
+  }
+  deleteNull() {
+    bullets.shift(0, 1);
+    this.direction = null;
+    this.size = null;
+    this.x = null;
+    this.y = null;
+    this.vx = null;
+    this.vy = null;
+    this.time = null;
+    this.color = null;
+    this.maxTime = null;
+    this.flak = null;
   }
 }
 
@@ -257,13 +265,22 @@ class Trail {
       ctx.restore();
     }
     if (this.time = 0) {
-      delete this;
+      this.x = null;
+      this.y = null;
+      this.color = null;
+      this.time = null;
+      this.size = null;
+      this.rate = null;
+      this.vx = null;
+      this.vy = null;
+      this.angle = null;
+      this.width = null;
       particles.shift();
     }}
   
   
     updateTri() {
-
+      if (Math.sqrt((this.x - f86.x) ** 2 + (this.y - f86.y) ** 2) <= 800 / zoomLevel) {
       if (this.size >= this.rate) {
         
         let VX1 = 1 * Math.cos(-this.angle) * this.size * 6;
@@ -295,8 +312,246 @@ class Trail {
         delete this;
         particles.shift();
       }
-    }
+    }}
 }
+
+class enemyTurret {
+  constructor(x, y, turretAngle, size, bulletPower, accuracy) {
+    this.x = x;
+    this.y = y;
+    this.turretAngle = turretAngle;
+    this.size = size;
+    this.bulletPower = bulletPower;
+    this.accuracy = accuracy;
+    this.c = 0;
+  }
+
+  drawBase() {
+    ctx.fillStyle = "grey";
+
+    ctx.save();
+    ctx.translate(window.innerWidth / 2, window.innerHeight / 2);
+    ctx.scale(zoomLevel,zoomLevel);
+    ctx.fillRect(this.x  - screenScroll[0], this.y + screenScroll[1], 1000, -500);
+    ctx.restore();
+  }
+
+  drawTurret() {
+    ctx.save();
+    ctx.translate(window.innerWidth / 2, window.innerHeight / 2);
+    ctx.scale(zoomLevel,zoomLevel);
+    ctx.fillStyle = "#9c9a9a";
+
+
+    ctx.beginPath();
+    ctx.moveTo(this.x - screenScroll[0] + 500, this.y + screenScroll[1] - 500);
+    ctx.lineTo(this.x + 500 - screenScroll[0] + (Math.cos(this.turretAngle) * 1000), this.y - 500 + screenScroll[1] + (Math.sin(this.turretAngle) * -1000));
+    
+    ctx.lineWidth = 30;
+    ctx.strokeStyle = 'blue';
+    ctx.stroke();
+
+    
+    ctx.beginPath();
+    ctx.arc(this.x - screenScroll[0] + 500, this.y + screenScroll[1] - 500, 350, 0, 2 * Math.PI);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  updateAim() {
+    var dx = f86.x - this.x;
+    var dy = f86.y - this.y;
+    var d = Math.sqrt(Math.pow(dy, 2) + Math.pow(dx, 2)) / 500;
+    var theta = Math.atan2(dy + f86.Vy * d, dx + f86.Vx * d + 10);
+    this.turretAngle = theta;
+  }
+
+  update() {
+    if (Math.sqrt((this.x - f86.x) ** 2 + (this.y + f86.y) ** 2) <= 8000 / zoomLevel) {
+      this.updateAim()
+      this.drawTurret()
+      this.drawBase()
+      this.c += 1;
+      if (this.c > 15) {
+        bullets.push(new Bullet(this.turretAngle, 7.5, this.x + 500 + (Math.cos(this.turretAngle) * 2500) ,  this.y + 500 + (Math.sin(this.turretAngle) * 2500), Math.cos(this.turretAngle) * 200, Math.sin(this.turretAngle) * 200, "red", true, 200));
+        this.c = 0;
+    }}}
+
+}
+
+class missle {
+  constructor(x, y, vx, vy, angle, turnSpeed, thrust, targetRadius, targetDistance, team) {
+    this.x = x;
+    this.y = y;
+    this.vx = vx;
+    this.vy = vy;
+    this.angle = angle;
+
+    this.turnSpeed = turnSpeed;
+    this.thrust = thrust;
+    this.targetRadius = targetRadius;
+    this.targetDistance = targetDistance;
+
+    this.size = size;
+    this.team = team;
+  }
+
+  updateAngle() {
+
+
+  }
+
+  update() {
+
+
+  }
+
+
+}
+
+
+
+
+
+
+class enemyPlane {
+  constructor (x, y ,vx, vy, angle, v) {
+    //General Information
+    this.x = x;
+    this.y = y;
+    this.vx = vx;
+    this.vy = vy;
+    this.angle = angle;
+    this.v = v;
+
+    //Specific info
+    this.g = 30
+    this.asp = 0;
+    this.bodyDrag = 0.05;
+    this.drag = 0.003125;
+    this.thrust = 50;
+    this.lift = 20;
+
+    //Guns
+    this.shots = 0;
+    this.maxShots = 50;
+    this.time = 0;
+    
+    this.coolDown = 100;
+    this.coolTime = 0;
+  };
+
+  updateForces() {
+    //Basic Velcoity Calculations
+    this.v = Math.sqrt((this.vx ** 2) + (this.vy ** 2));
+
+    //Calculation Drag
+    let attack = this.angle - this.asp;
+    this.asp = this.angle;
+    var D = (this.drag * Math.sin(attack) + this.bodyDrag) * Math.pow(this.v, 2) / 10;
+
+    //Speed up or slow down
+    let r = Math.sqrt(Math.pow(-this.y + f86.y, 2) + Math.pow(-this.x + f86.x, 2))
+    if (Math.abs(attack) == 0 && this.thrust < 120 && r > 6000) {
+      this.thrust += 1
+    } else if (this.thrust > 35) {this.thrust -= 1}
+
+    //Calculation thrust
+    let tx = this.thrust * Math.cos(this.angle) * 2.5;
+    let ty = this.thrust * Math.sin(this.angle) * 2.5;
+
+    //Lift Calculation
+    var lY = Math.abs(this.v * this.lift * Math.pow(Math.sin(this.angle + Math.PI / 2), 2)) / 200;
+
+    //Everything togheter
+    this.vx = Math.floor((Math.cos(this.angle) * (this.v - D) + tx) * 10000) / 10000;
+    this.vy = Math.floor((Math.sin(this.angle) * (this.v - D) + ty + lY - this.g) * 100) / 100;
+
+    //Adding the calculated velocities
+    this.x += this.vx;
+    this.y += this.vy;
+
+    //Dealing with Ground Collisions Basic stuff
+    if (this.y < 10 && this.vy < 0) {this.y = 10; this.vy = 0; this.vx /= 2;};
+
+    //Guns
+    let a = ((Math.atan2(-this.y + f86.y + f86.Vy, -this.x + f86.x + f86.Vx) + Math.PI * 2) % (Math.PI * 2))
+    
+    if (r < 9000) {
+      if (Math.abs(this.angle - a) < Math.PI / 4 && this.shots <= this.maxShots && this.coolTime == this.coolDown) {
+        if (this.time >= 5) {
+          bullets.push(new Bullet(this.angle, 15, this.x + Math.cos(this.angle) * (Math.floor(Math.random() * (101)) + 100), this.y + Math.sin(this.angle) * (Math.floor(Math.random() * (101)) + 100), this.vx + Math.cos(this.angle) * 600  + Math.floor(Math.random() * 4) - 2, this.vy + Math.sin(this.angle) * 600  + Math.floor(Math.random() * 4) - 2, "red"));
+          this.shots += 1;
+          this.time = 0;
+          }
+        this.time += 1
+
+        if (this.shots > this.maxShots) {
+          this.coolTime = 0;
+          this.shots = 0;
+        }
+      
+      } else if (this.coolTime < this.coolDown) {
+        this.coolTime += 1
+     } }
+  }
+  render() {
+    let a = ((this.angle + Math.PI / 8) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+    let r = Math.floor((4 * a) / Math.PI);
+    
+    ctx.save();
+    
+    ctx.translate(window.innerWidth / 2, window.innerHeight / 2);
+    ctx.scale(-1*zoomLevel/2, 1*zoomLevel/2);
+    ctx.translate(Math.floor(-this.x * 2 + screenScroll[0]*2), Math.floor(-this.y * 2 + screenScroll[1]*2))
+    ctx.rotate(this.angle - Math.PI / 2)
+    ctx.drawImage(resources[r], -resources[r].width / 2, -resources[r].height / 2, resources[r].width, resources[r].height);
+    ctx.restore();
+  }
+  calcAngle() {
+    
+    let p = 0;
+    for (let i = 0; i < enemyPlanes.length; i++) {
+      let r = Math.sqrt(Math.pow(-this.y + enemyPlanes[i].y, 2) + Math.pow(-this.x + enemyPlanes[i].x, 2))
+      if (r < 5000 && r != 0) {
+        p = Math.sign(Math.atan(-this.y + enemyPlanes[i].y, -this.x + enemyPlanes[i].x))
+
+        
+      }
+    }
+
+    let a = ((Math.atan2(-this.y + f86.y + f86.Vy, -this.x + f86.x + f86.Vx) + Math.PI * 2) % (Math.PI * 2))
+
+    if (this.y < 6000) {a = Math.PI / 2}
+
+
+    this.angle = (this.angle + Math.PI * 2) % (Math.PI * 2)
+    let dif = (a - this.angle);
+    let f = 0;
+    let s = Math.min(Math.abs(dif - Math.PI * 2), Math.abs(dif));
+
+    if (Math.abs(dif) == s) {f = dif} 
+    
+    else if (Math.abs(dif - Math.PI * 2)) {
+      f = dif - Math.PI * 2 
+    }
+
+    if (Math.abs(f) < Math.PI / 2) {
+      if (f > Math.PI / 90) {this.angle += Math.PI / 90 + p * Math.PI / 90} 
+      else if (f < -Math.PI / 90) {this.angle -= Math.PI / 90 + p * Math.PI / 90}
+  }
+  else {this.angle += Math.PI / 90 + p * Math.PI / 90}
+
+
+  }
+  update() {
+    this.calcAngle()
+    this.updateForces();
+    this.render();
+  }
+}
+
 
 //Functions//
 //Functions//
@@ -320,6 +575,9 @@ document.addEventListener("keydown", function (event) {
   } else if (event.key === "x") {
     zoomin = true;
     zoomInterval = setInterval(zoomIn, 16);
+  } else if (event.key === "Space") {
+    f86.Vx = 0
+    f86.Vy = 0
   };
 });
 
@@ -368,7 +626,7 @@ document.addEventListener("keyup", function (event) {
   function handleMouseUp() {firing = false;}
 
   function adjustAngle(angleRad) {
-    while (angleRad < 0 || angleRad >= 2 * Math.PI) {
+    if (angleRad < 0 || angleRad >= 2 * Math.PI) {
       if (angleRad < 0) {
         angleRad += 2 * Math.PI;
       } else if (angleRad >= 2 * Math.PI) {
@@ -396,50 +654,16 @@ document.addEventListener("keyup", function (event) {
       } else {
         result = dif + Math.PI * 2;
       }   
-  
           if (Math.abs(result) > f86.turnRate) {
-  
             if (result < 0) {f86.angle -= f86.turnRate;}
-  
             else {f86.angle += f86.turnRate;}} 
-  
           else{f86.angle === nAngle;}
-  
     }
     f86.angle = adjustAngle(f86.angle);
-    
-
+  
   }
 
-  /*function drawCursor(){
-    ctx.save()
-    ctx.scale(0.5, 0.5)
-    ctx.fillStyle = "rgba(60, 255, 0, 1)";
-    ctx.strokeStyle = "rgba(60, 255, 0, 1)";
-    ctx.lineWidth = 10;
-    
-    ctx.beginPath();
-    ctx.arc(mouse_x , mouse_y + window_height / 2, 160, 0, Math.PI * 2 );
-    ctx.stroke();
-
-  
-    // Transform "Rectangle"
-   
-    // Draw "Rectangle"
-    ctx.beginPath();
-    ctx.rect(-48, 0, 352, 32);
-    ctx.fill();
-    
-
-   
-    
-    // Draw "Rectangle 1"
-    ctx.beginPath();
-    ctx.rect(0, -80, 32, 352);
-    ctx.fill();
-    
-    ctx.restore()
-  }*/
+  // * (120 / (f86.v + 1))
   
 //MainLoop//
 //MainLoop//
@@ -449,29 +673,24 @@ document.addEventListener("keyup", function (event) {
 //MainLoop//
 
 ground = new Ground(-500000, 0, "#315e33", 1000000, 50000, 0, true);
-tower1 = new Ground(-5000, -5000, "rgba(113, 122, 163, 1)", 1000, 5000, 1, false);
-tower2 = new Ground(-2000, -6000, "rgba(66, 70, 94, 1)", 1000, 6000, 1, false);
-tower3 = new Ground(1000, -3000, "rgba(87, 130, 116, 1)", 1000, 3000, 1, false);
-tower4 = new Ground(5000, -2000, "rgba(102, 112, 109, 1)", 1000, 2000, 1, false);
-tower5 = new Ground(8000, -5000, "rgba(113, 122, 163, 1)", 1000, 5000, 1, false);
-tower6 = new Ground(11000, -6000, "rgba(66, 70, 94, 1)", 1000, 6000, 1, false);
-tower7 = new Ground(14000, -3000, "rgba(87, 130, 116, 1)", 1000, 3000, 1, false);
-tower8 = new Ground(17000, -2000, "rgba(102, 112, 109, 1)", 1000, 2000, 1, false);
-tower9 = new Ground(20000, -5000, "rgba(113, 122, 163, 1)", 1000, 5000, 1, false);
-tower10 = new Ground(23000, -6000, "rgba(66, 70, 94, 1)", 1000, 6000, 1, false);
-tower11 = new Ground(26000, -3000, "rgba(87, 130, 116, 1)", 1000, 3000, 1, false);
-tower12 = new Ground(28500, -2000, "rgba(102, 112, 109, 1)", 1000, 2000, 1, false);
 
-var grounds = [tower12, tower11, tower10, tower9, tower8, tower7, tower6, tower5, tower4, tower3, tower2, tower1, ground];
+var grounds = [ground];
+var buildCount = 50
+for (let i = 0; buildCount > i; i++) {
+  let height = Math.floor((Math.random() * 10000)) + 1000
+  grounds.push(new Ground(buildCount * -3000 / 2 + i * 3000, -height, "rgba(113, 122, 163, 1)", 1500, height, 1, false))
 
+};
+
+/* Loading Resources: Loading Resources: Loading Resources: Loading Resources: Loading Resources: Loading Resources: */
+/* Loading Resources: Loading Resources: Loading Resources: Loading Resources: Loading Resources: Loading Resources: */
+/* Loading Resources: Loading Resources: Loading Resources: Loading Resources: Loading Resources: Loading Resources: */
 var resources = [];
 
 function loadResources(resourceUrls) {
   return new Promise(function(resolve, reject) {
     var loadedResources = 0;
     var totalResources = resourceUrls.length;
-    
-
     function onLoad() {
       loadedResources++;
       if (loadedResources === totalResources) {
@@ -501,41 +720,66 @@ function loadResources(resourceUrls) {
     });
   });
 }
+/* Loading Resources: Loading Resources: Loading Resources: Loading Resources: Loading Resources: Loading Resources: */
+/* Loading Resources: Loading Resources: Loading Resources: Loading Resources: Loading Resources: Loading Resources: */
+/* Loading Resources: Loading Resources: Loading Resources: Loading Resources: Loading Resources: Loading Resources: */
 
 
+var turret1 = new enemyTurret(0, 0, 0, 50, 50, 50)
+var turret2 = new enemyTurret(50000, 0, 0, 50, 50, 50)
+var turret3 = new enemyTurret(-50000, 0, 0, 50, 50, 50)
 
+var enemy = new enemyPlane(20,1000, 0, 0, 0, 0);
+var enemy1 = new enemyPlane(0,2000, 0, 0, 0, 0);
+var enemy2 = new enemyPlane(0,3000, 10, 50, 0, 0);
+var enemy3 = new enemyPlane(3000,5000, 10, 50, 0, 0);
+const enemyPlanes = [enemy, enemy1, enemy2, enemy3]
+
+var turrets = [turret1, turret2, turret3]
+//var turrets = []
 loadResources(imageUrls)
   .then(function(resources) {
     
     
-    f86 = new Player("f86", 0, 0, 20, Math.PI / 90, 100, 0, 1, 0, 0.003125, resources[1], true, 0 ,10000);
+    f86 = new Player("f86", 0, 0, 20, Math.PI / 70, 100, 0, 1, 0, 0.003125, true, 0 ,10000, 100);
+
     mainLoop();
   })
   .catch(function(error) {
     console.error("Failed to load resources:", error);
   });
+
 function mainLoop() {
   // Your game logic here
 }
-
-
 function mainLoop() {
 
-    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     f86.updateForces();
     screenScroll = [f86.x, f86.y];
-
-    for (i = 0; i < grounds.length; i++) {
+    
+    for (let i = 0; i < grounds.length; i++) {
       grounds[i].render();
     }
 
-    for (i = 0; i < bullets.length; i++) {
+    for (let i = 0; i < bullets.length; i++) {
       bullets[i].update();
     }
+
+    for (let i = 0; i < turrets.length; i++) {
+      turrets[i].update();
+    }
+
+    for (let i = 0; i < enemyPlanes.length; i++) {
+      enemyPlanes[i].update();
+  
+    }
+    
+    
     findAngle()
     f86.update();
-    for (i = 0; i < particles.length; i++) {
+    for (let i = 0; i < particles.length; i++) {
       particles[i].updateTri(0);
     }
    
@@ -557,9 +801,13 @@ function mainLoop() {
     ctx.fillText(`Ammo:${coolDown == ready ? shotCountMax - shotCount: "--"}`, 5, 175);
     ctx.fillText(`Power:${f86.thrust}`, 5, 205);
     ctx.fillText(`Ammo:${coolDown < ready ? coolDown: "--"}`, 5, 235);
+    ctx.fillText(`health:${f86.health}`, 5, 265);
     
     requestAnimationFrame(mainLoop);
 }
 
 
 
+
+
+  

@@ -1,2 +1,0 @@
-cd /users/liam/Desktop/Ace\ Pixels\ Mk3/new\ code
-http-server

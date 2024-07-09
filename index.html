@@ -1,25 +1,20 @@
-<!doctype html>
+<!DOCTYPE html>
 
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>AcePixels | Canvas</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-    <head>
-        
-        <meta charset="UTF-8"/>
-        
-        <title> AcePixels | Canvas</title>
-        <link rel="stylesheet" href="style.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=B612+Mono&display=swap" rel="stylesheet">
+  <body>
+    <!-- Main game canvas-->
+    <canvas id="canvas" class="canvas"></canvas>
+  </body>
 
-    </head>
-
-    <body>
-
-        <canvas id="canvas" class="canvas"></canvas>
-
-    </body>
-
-    <script src="main.js"></script>
-
+  <!-- Main script -->
+  <script type="module" src="src/main.js"></script>
+  <!-- Modules -->
+  <script src="src/planes.js"></script>
+  <script src="src/particles.js"></script>
 </html>
